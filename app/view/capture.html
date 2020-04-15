@@ -134,7 +134,7 @@
 
             var uploadFiles = canvas.toDataURL("image/png");
 
-            if (uploadFiles.length !== 1) alert("Please select a file to analyze!");
+            // if (uploadFiles.length !== 1) alert("Please select a file to analyze!");
 
             el("analyze-button").innerHTML = "Analyzing...";
             var xhr = new XMLHttpRequest();
@@ -155,7 +155,7 @@
             };
 
             var fileData = new FormData();
-            fileData.append("file", uploadFiles[0]);
+            fileData.append("file", uploadFiles);
             xhr.send(fileData);
 
 

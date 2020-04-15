@@ -55,6 +55,12 @@ async def homepage(request):
     return HTMLResponse(html_file.open().read())
 
 
+@app.route('/capture')
+async def homepage(request):
+    html_file = path / 'view' / 'capture.html'
+    return HTMLResponse(html_file.open().read())
+
+
 @app.route('/analyze', methods=['POST'])
 async def analyze(request):
     img_data = await request.form()
