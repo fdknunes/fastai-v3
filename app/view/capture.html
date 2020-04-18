@@ -8,22 +8,17 @@
             width: 98%;
             max-width: 860px;
         }
-
         .error {
             color: red;
         }
-
         .warn {
             color: orange;
         }
-
         .info {
             color: darkgreen;
         }
     </style>
-
     <title>Using the Screen Capture API - Simple_screen_capture - code sample</title>
-
 </head>
 
 <body data-gr-c-s-loaded="true">
@@ -32,8 +27,7 @@
         Click the Start Capture button to begin.</p>
 
     <p><button id="start">Start Capture</button>
-        <button id="stop">Stop Capture</button>
-    </p>
+        <button id="stop">Stop Capture</button></p>
 
     <video id="video" autoplay=""></video>
     <br>
@@ -57,24 +51,26 @@
         const logElem = document.getElementById("log");
         const startElem = document.getElementById("start");
         const stopElem = document.getElementById("stop");
-
         var myVar = setInterval(myTimer, 1000);
-        var id = setInterval(frame, 7000);
+        var id = setInterval(frame, 5000);
         var capture = false;
+
 
         function frame() {
             if (capture) {
                 startElem.disabled = false;
                 takeASnap()
-                // .then(download);
+                 .then(download);
             }
         }
+
 
         function myTimer() {
             var d = new Date();
             var t = d.toLocaleTimeString();
             document.getElementById("demo").innerHTML = t;
         }
+
 
         // Options for getDisplayMedia()
         var displayMediaOptions = {
@@ -83,6 +79,7 @@
             },
             audio: false
         };
+
 
         // Set event listeners for the start and stop buttons
         startElem.addEventListener("click", function (evt) {
@@ -97,7 +94,6 @@
         }, false);
 
 
-
         async function startCapture() {
             //logElem.innerHTML = "";
             try {
@@ -108,6 +104,7 @@
             }
         }
 
+
         function stopCapture(evt) {
             let tracks = videoElem.srcObject.getTracks();
 
@@ -115,6 +112,7 @@
             videoElem.srcObject = null;
             clearInterval(id);
         }
+
 
         function dumpOptionsInfo() {
             const videoTrack = videoElem.srcObject.getVideoTracks()[0];
@@ -125,102 +123,51 @@
             console.info(JSON.stringify(videoTrack.getConstraints(), null, 2));
         }
 
+
         function takeASnap() {
             const canvas = document.createElement('canvas'); // create a canvas
             const ctx = canvas.getContext('2d'); // get its context
             canvas.width = videoElem.videoWidth; // set its size to the one of the video
             canvas.height = videoElem.videoHeight;
-            ctx.drawImage(videoElem, 0, 0); // the video
+            ctx.drawImage(videoElem, 0, 0); // the vid
 
-            var uploadFiles = canvas.toDataURL("image/png");
-
-            // if (uploadFiles.length !== 1) alert("Please select a file to analyze!");
-
-            el("analyze-button").innerHTML = "Analyzing...";
-            var xhr = new XMLHttpRequest();
-            var loc = window.location;
-            xhr.open("POST", `https://beartest-1g7n.onrender.com/analyze`,
-                true);
-            xhr.onerror = function () {
-                alert(xhr.responseText);
-            };
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
-            xhr.onload = function (e) {
-                if (this.readyState === 4) {
-                    var response = JSON.parse(e.target.responseText);
-                    el("result-label").innerHTML = `Result = ${response["result"]}`;
-                }
-                el("analyze-button").innerHTML = "Analyze";
-            };
-
-            var fileData = new FormData();
-            fileData.append("file", uploadFiles);
-            xhr.send(fileData);
-
-
+            return new Promise((res, rej) => {
+                canvas.toBlob(res, 'image/jpeg'); // request a Blob from the canvas
+                //canvas.toDataURL("image/png");
+            });
         }
 
+
         function download(blob) {
-            // //uses the <a download> to download a Blob
+            //uses the <a download> to download a Blob
             // let a = document.createElement('a');
             // a.href = URL.createObjectURL(blob);
-            // a.download = 'screenshot.jpg';
+            // a.download = 'zoom/screenshot.jpg';
             // document.body.appendChild(a);
             // a.click();
 
 
+            el("analyze-button").innerHTML = "Analyzing...";
+
+            var xhr = new XMLHttpRequest();
+            var loc = window.location
+            xhr.open('POST', `https://beartest-1g7n.onrender.com/analyze`, true);
+            // xhr.open('POST', `https://fastai-v3.onrender.com/analyze`, true);
+            xhr.onerror = function() {alert (xhr.responseText);}
+            xhr.onload = function(e) {
+                if (this.readyState === 4) {
+                    var response = JSON.parse(e.target.responseText);
+                    el('result-label').innerHTML = `Result = ${response['result']}`;
+                }
+            }
+
+            var file = new File([blob], "image.png", { type: "image/png",lastModified : new Date()});
+            var fileData = new FormData();
+            fileData.append('file', file);
+
+            xhr.send(fileData);
+
         }
-
-        function sendImage() {
-            var canvasData = canvas.toDataURL("image/png");
-            var xmlHttpReq = false;
-            if (window.XMLHttpRequest) {
-                ajax = new XMLHttpRequest();
-            }
-            else if (window.ActiveXObject) {
-                ajax = new ActiveXObject("Microsoft.XMLHTTP");
-            }
-            ajax.open("POST", "testSave.php", false);
-            ajax.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            ajax.onreadystatechange = function () {
-                console.log(ajax.responseText);
-            }
-            ajax.send("imgData=" + canvasData);
-        }
-
-        // function analyze(blob) {
-        //     alert(blob);
-        //     var uploadFiles = URL.createObjectURL(blob);
-        //     if (uploadFiles.length !== 1) alert("Please select a file to analyze!");
-
-        //     el("analyze-button").innerHTML = "Analyzing...";
-        //     var xhr = new XMLHttpRequest();
-        //     var loc = window.location;
-        //     xhr.open("POST", `https://beartest-1g7n.onrender.com/analyze`,
-        //         true);
-        //     xhr.onerror = function () {
-        //         alert(xhr.responseText);
-        //     };
-        //     xhr.onload = function (e) {
-        //         if (this.readyState === 4) {
-        //             var response = JSON.parse(e.target.responseText);
-        //             el("result-label").innerHTML = `Result = ${response["result"]}`;
-        //         }
-        //         el("analyze-button").innerHTML = "Analyze";
-        //     };
-
-        //     var fileData = new FormData();
-        //     fileData.append("file", uploadFiles);
-        //     xhr.send(fileData);
-        // }
-
-
-
-
     </script>
-
-
 </body>
-
 </html>
