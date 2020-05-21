@@ -43,131 +43,122 @@
     </div>
 
 
-    <script>
 
-        var el = x => document.getElementById(x);
-
-        const videoElem = document.getElementById("video");
-        const logElem = document.getElementById("log");
-        const startElem = document.getElementById("start");
-        const stopElem = document.getElementById("stop");
-        var myVar = setInterval(myTimer, 1000);
-        var id = setInterval(frame, 5000);
-        var capture = false;
-
-
-        function frame() {
-            if (capture) {
-                startElem.disabled = false;
-                takeASnap()
-                 .then(download);
-            }
-        }
-
-
-        function myTimer() {
-            var d = new Date();
-            var t = d.toLocaleTimeString();
-            document.getElementById("demo").innerHTML = t;
-        }
-
-
-        // Options for getDisplayMedia()
-        var displayMediaOptions = {
-            video: {
-                cursor: "always"
-            },
-            audio: false
-        };
-
-
-        // Set event listeners for the start and stop buttons
-        startElem.addEventListener("click", function (evt) {
-            startCapture();
-            capture = true;
-        }, false);
-
-
-        stopElem.addEventListener("click", function (evt) {
-            stopCapture();
-            clearInterval(id);
-        }, false);
-
-
-        async function startCapture() {
-            //logElem.innerHTML = "";
-            try {
-                videoElem.srcObject = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
-                dumpOptionsInfo();
-            } catch (err) {
-                console.error("Error: " + err);
-            }
-        }
-
-
-        function stopCapture(evt) {
-            let tracks = videoElem.srcObject.getTracks();
-
-            tracks.forEach(track => track.stop());
-            videoElem.srcObject = null;
-            clearInterval(id);
-        }
-
-
-        function dumpOptionsInfo() {
-            const videoTrack = videoElem.srcObject.getVideoTracks()[0];
-
-            console.info("Track settings:");
-            console.info(JSON.stringify(videoTrack.getSettings(), null, 2));
-            console.info("Track constraints:");
-            console.info(JSON.stringify(videoTrack.getConstraints(), null, 2));
-        }
-
-
-        function takeASnap() {
-            const canvas = document.createElement('canvas'); // create a canvas
-            const ctx = canvas.getContext('2d'); // get its context
-            canvas.width = videoElem.videoWidth; // set its size to the one of the video
-            canvas.height = videoElem.videoHeight;
-            ctx.drawImage(videoElem, 0, 0); // the vid
-
-            return new Promise((res, rej) => {
-                canvas.toBlob(res, 'image/jpeg'); // request a Blob from the canvas
-                //canvas.toDataURL("image/png");
-            });
-        }
-
-
-        function download(blob) {
-            //uses the <a download> to download a Blob
-            // let a = document.createElement('a');
-            // a.href = URL.createObjectURL(blob);
-            // a.download = 'zoom/screenshot.jpg';
-            // document.body.appendChild(a);
-            // a.click();
-
-
-            el("analyze-button").innerHTML = "Analyzing...";
-
-            var xhr = new XMLHttpRequest();
-            var loc = window.location
-            xhr.open('POST', `https://beartest-1g7n.onrender.com/analyze`, true);
-            // xhr.open('POST', `https://fastai-v3.onrender.com/analyze`, true);
-            xhr.onerror = function() {alert (xhr.responseText);}
-            xhr.onload = function(e) {
-                if (this.readyState === 4) {
-                    var response = JSON.parse(e.target.responseText);
-                    el('result-label').innerHTML = `Result = ${response['result']}`;
-                }
-            }
-
-            var file = new File([blob], "image.png", { type: "image/png",lastModified : new Date()});
-            var fileData = new FormData();
-            fileData.append('file', file);
-
-            xhr.send(fileData);
-
-        }
-    </script>
 </body>
+
 </html>
+
+<script>
+
+    var el = x => document.getElementById(x);
+
+    const videoElem = document.getElementById("video");
+    const logElem = document.getElementById("log");
+    const startElem = document.getElementById("start");
+    const stopElem = document.getElementById("stop");
+    var myVar = setInterval(myTimer, 1000);
+    var id = setInterval(frame, 5000);
+    var capture = false;
+
+    // Set event listeners for the start and stop buttons
+    startElem.addEventListener("click", function (evt) {
+        startCapture();
+        capture = true;
+    }, false);
+
+    stopElem.addEventListener("click", function (evt) {
+        stopCapture();
+        clearInterval(id);
+    }, false);
+
+    //Function to Show the timer in the screen
+    function myTimer() {
+        var d = new Date();
+        var t = d.toLocaleTimeString();
+        document.getElementById("demo").innerHTML = t;
+    }
+
+    // Define Frame
+    function frame() {
+        if (capture) {
+            startElem.disabled = false;
+            takeASnap()
+                .then(streamToModel);
+        }
+    }
+
+    // Options for getDisplayMedia()
+    var displayMediaOptions = {
+        video: {
+            cursor: "always"
+        },
+        audio: false
+    };
+
+    async function startCapture() {
+        try {
+            videoElem.srcObject = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
+            dumpOptionsInfo();
+        } catch (err) {
+            console.error("Error: " + err);
+        }
+    }
+
+    function stopCapture(evt) {
+        let tracks = videoElem.srcObject.getTracks();
+        tracks.forEach(track => track.stop());
+        videoElem.srcObject = null;
+        clearInterval(id);
+    }
+
+    function dumpOptionsInfo() {
+        const videoTrack = videoElem.srcObject.getVideoTracks()[0];
+        console.info("Track settings:");
+        console.info(JSON.stringify(videoTrack.getSettings(), null, 2));
+        console.info("Track constraints:");
+        console.info(JSON.stringify(videoTrack.getConstraints(), null, 2));
+    }
+
+    function takeASnap() {
+        const canvas = document.createElement('canvas'); // create a canvas
+        const ctx = canvas.getContext('2d'); // get its context
+        canvas.width = videoElem.videoWidth; // set its size to the one of the video
+        canvas.height = videoElem.videoHeight;
+        ctx.drawImage(videoElem, 0, 0); // the vid
+
+        return new Promise((res, rej) => {
+            canvas.toBlob(res, 'image/jpeg'); // request a Blob from the canvas
+            //canvas.toDataURL("image/png");
+        });
+    }
+
+    function streamToModel(blob) {
+        //uses the <a streamToModel> to streamToModel a Blob
+        // let a = document.createElement('a');
+        // a.href = URL.createObjectURL(blob);
+        // a.streamToModel = 'zoom/screenshot.jpg';
+        // document.body.appendChild(a);
+        // a.click();
+
+        el("analyze-button").innerHTML = "Analyzing...";
+
+        var xhr = new XMLHttpRequest();
+        var loc = window.location
+        xhr.open('POST', `https://beartest-1g7n.onrender.com/analyze`, true);
+
+        xhr.onerror = function () { alert(xhr.responseText); }
+        xhr.onload = function (e) {
+            if (this.readyState === 4) {
+                var response = JSON.parse(e.target.responseText);
+                el('result-label').innerHTML = `Result = ${response['result']}`;
+            }
+        }
+
+        var file = new File([blob], "image.png", { type: "image/png", lastModified: new Date() });
+        var fileData = new FormData();
+        fileData.append('file', file);
+
+        xhr.send(fileData);
+    }
+
+</script>
