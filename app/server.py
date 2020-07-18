@@ -75,11 +75,16 @@ async def analyze(request):
 
 @app.route('/predict', methods=['POST'])
 async def predict(request):
-    img_data = await request.form()
-    print (img_data)
-    imgdata = base64.b64decode(img_data)
-    
-    prediction = learn.predict(imgdata)[0]
+    img_data = await request.form('data')
+    print(img_data)
+    data_URL_Image = Image.open(io.BytesIO(base64.b64decode(img_data.split(',')[1])))
+    imgByteArr = io.BytesIO()
+    data_URL_Image.save(imgByteArr, format='PNG')
+    imgByteArr = imgByteArr.getvalue()
+
+    img = open_image(BytesIO(imgByteArr))
+
+    prediction = learn.predict(img)[0]
     return JSONResponse({'result': str(prediction)})
 
 
