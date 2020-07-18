@@ -75,7 +75,8 @@ async def analyze(request):
 
 @app.route('/predict', methods=['POST'])
 async def predict(request):
-    img_data = await request.form('data')
+    client_image = await request.form()
+    img_data = client_image['file']
     print(img_data)
     data_URL_Image = Image.open(io.BytesIO(base64.b64decode(img_data.split(',')[1])))
     imgByteArr = io.BytesIO()
