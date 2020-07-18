@@ -8,6 +8,7 @@ from starlette.applications import Starlette
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import HTMLResponse, JSONResponse
 from starlette.staticfiles import StaticFiles
+import base64
 
 # export_file_url = 'https://www.googleapis.com/drive/v3/files/1-I9CBAeAGw4kKi7RglAdYEA16arP63Cp?alt=media&key=AIzaSyCIqpNEX8Io8Y5QeeHlR5ShbbMw-IC2emc'
 export_file_url = 'https://www.googleapis.com/drive/v3/files/1-8hGR23hDC47xHTi9ewKJEvkKps3NsOx?alt=media&key=AIzaSyCIqpNEX8Io8Y5QeeHlR5ShbbMw-IC2emc'
@@ -69,6 +70,16 @@ async def analyze(request):
     img_bytes = await (img_data['file'].read())
     img = open_image(BytesIO(img_bytes))
     prediction = learn.predict(img)[0]
+    return JSONResponse({'result': str(prediction)})
+
+
+@app.route('/predict', methods=['POST'])
+async def predict(request):
+    img_data = await request.form()
+    print (img_data)
+    imgdata = base64.b64decode(img_data)
+    
+    prediction = learn.predict(imgdata)[0]
     return JSONResponse({'result': str(prediction)})
 
 
