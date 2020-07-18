@@ -8,8 +8,8 @@ from starlette.applications import Starlette
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import HTMLResponse, JSONResponse
 from starlette.staticfiles import StaticFiles
-import base64
-import Image
+import io, base64
+from PIL import Image
 
 # export_file_url = 'https://www.googleapis.com/drive/v3/files/1-I9CBAeAGw4kKi7RglAdYEA16arP63Cp?alt=media&key=AIzaSyCIqpNEX8Io8Y5QeeHlR5ShbbMw-IC2emc'
 export_file_url = 'https://www.googleapis.com/drive/v3/files/1-8hGR23hDC47xHTi9ewKJEvkKps3NsOx?alt=media&key=AIzaSyCIqpNEX8Io8Y5QeeHlR5ShbbMw-IC2emc'
